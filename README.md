@@ -12,7 +12,7 @@ opts := &protogen.Options{
     // ...
 }
 
-err := opts.Run(func (gen *protogen.Plugin) error {
+err := opts.Run(func (gen protogen.Generator) error {
     // ...
 })
 if err != nil {
@@ -29,6 +29,7 @@ For testing, you can provide a preparsed `CodeGeneratorRequest` manually.
 opts := &protogen.Options{
     // ...
 }
+
 req := &pluginpb.CodeGeneratorRequest{
     // ...
 }

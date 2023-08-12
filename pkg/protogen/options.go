@@ -70,6 +70,6 @@ func (opts *Options) NewPlugin() (*Plugin, error) {
 
 // Run handles the protoc plugin protocol using the provided
 // handler and Options values
-func (opts *Options) Run(fn func(*Plugin) error) error {
+func (opts *Options) Run(fn func(Generator) error) error {
 	return Run(opts, fn)
 }

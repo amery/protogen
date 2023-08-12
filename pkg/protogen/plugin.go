@@ -6,6 +6,10 @@ import (
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
+var (
+	_ Generator = (*Plugin)(nil)
+)
+
 // Plugin is the protoc code generator engine
 type Plugin struct {
 	options Options

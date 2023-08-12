@@ -5,7 +5,7 @@ package protogen
 // Options and handler.
 // if Options is nil, a new one will be created with
 // default values.
-func Run(opts *Options, fn func(*Plugin) error) error {
+func Run(opts *Options, fn func(Generator) error) error {
 	gen, err := NewPlugin(opts, nil)
 	if err != nil {
 		gen.Print(err)
