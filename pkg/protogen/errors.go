@@ -8,6 +8,10 @@ import (
 var (
 	// ErrNotImplemented tells certain logic hasn't been implemented yet
 	ErrNotImplemented = errors.New("not implemented")
+	// ErrInvalidName tells the requested file name isn't acceptable
+	ErrInvalidName = errors.New("invalid name")
+	// ErrInvalidUTF8Content tells the plugin generated unacceptable content
+	ErrInvalidUTF8Content = errors.New("invalid UTF-8 content generated")
 )
 
 // WrappedError is a simple wrapped error container

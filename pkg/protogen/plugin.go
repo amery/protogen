@@ -12,8 +12,9 @@ type Plugin struct {
 	req     *pluginpb.CodeGeneratorRequest
 	resp    pluginpb.CodeGeneratorResponse
 
-	params map[string]string
-	files  []*File
+	params    map[string]string
+	files     []*File
+	generated map[string]*GeneratedFile
 }
 
 func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {
@@ -47,16 +48,17 @@ func (gen *Plugin) Printf(format string, v ...any) {
 	gen.options.Logger.Printf(format, v...)
 }
 
-// NewPlugin creates and initialises a new protoc Plugin handler.
+// NewPlugin creates and initializes a new protoc Plugin handler.
 // If a CodeGeneratorRequest isn't provided, Options.Stdin will
-// be unmarshalled instead.
+// be deserialized instead.
 func NewPlugin(opts *Options, req *pluginpb.CodeGeneratorRequest) (*Plugin, error) {
 	if opts == nil {
 		opts = &Options{}
 	}
 
 	gen := &Plugin{
-		options: *opts,
+		options:   *opts,
+		generated: make(map[string]*GeneratedFile),
 	}
 
 	if err := gen.init(req); err != nil {
