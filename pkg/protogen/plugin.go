@@ -30,7 +30,7 @@ func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {
 		}
 	}
 
-	return gen.unsafeLoadRequest(req)
+	return gen.loadRequest(req)
 }
 
 // Print logs an error in the manner of fmt.Print

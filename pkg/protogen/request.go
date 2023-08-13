@@ -28,7 +28,7 @@ func UnmarshalCodeGeneratorRequest(r io.Reader) (*pluginpb.CodeGeneratorRequest,
 	return req, nil
 }
 
-func (gen *Plugin) unsafeLoadRequest(req *pluginpb.CodeGeneratorRequest) error {
+func (gen *Plugin) loadRequest(req *pluginpb.CodeGeneratorRequest) error {
 	// TODO: populate Plugin in a useful way
 	gen.req = req
 	return nil

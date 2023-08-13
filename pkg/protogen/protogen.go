@@ -6,17 +6,22 @@ import "google.golang.org/protobuf/types/pluginpb"
 // Handler uses Generator to generate code
 type Handler func(Generator) error
 
+// RequestDescriptor is the abstraction of an element on the Request
+type RequestDescriptor interface {
+	// Request returns the received [pluginpb.CodeGeneratorRequest]
+	Request() *pluginpb.CodeGeneratorRequest
+}
+
 // Generator is the interface implemented by our Plugin for the Handler
 type Generator interface {
+	RequestDescriptor
+
 	// Print logs an error in the manner of fmt.Print
 	Print(...any)
 	// Println logs an error in the manner of fmt.Println
 	Println(...any)
 	// Printf logs an error in the manner of fmt.Printf
 	Printf(string, ...any)
-
-	// Request returns the received [pluginpb.CodeGeneratorRequest]
-	Request() *pluginpb.CodeGeneratorRequest
 }
 
 // Run handles the protoc plugin protocol using the provided
