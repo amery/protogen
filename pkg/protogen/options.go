@@ -63,8 +63,8 @@ func (opts *Options) SetDefaults() {
 	}
 }
 
-// NewPlugin allocates a Plugin using the Options values
-func (opts *Options) NewPlugin() (*Plugin, error) {
+// New allocates a Generator using the Options values
+func (opts *Options) New() (*Plugin, error) {
 	return NewPlugin(opts, nil)
 }
 

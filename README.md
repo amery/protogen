@@ -34,7 +34,7 @@ req := &pluginpb.CodeGeneratorRequest{
     // ...
 }
 
-gen, err := protogen.NewPlugin(opts, req)
+gen, err := opts.New(req)
 if err != nil {
     log.Fatal(err)
 }
