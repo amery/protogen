@@ -30,7 +30,13 @@ func UnmarshalCodeGeneratorRequest(r io.Reader) (*pluginpb.CodeGeneratorRequest,
 }
 
 func (gen *Plugin) loadRequest(req *pluginpb.CodeGeneratorRequest) error {
-	// TODO: populate Plugin in a useful way
+	// []ProtoFile
+	gen.loadFiles(req.ProtoFile...)
+	if err := gen.setFilesGenerate(req.FileToGenerate...); err != nil {
+		return err
+	}
+
+	// Parameter
 	if err := gen.loadParams(optional(req.Parameter, "")); err != nil {
 		return err
 	}

@@ -1,7 +1,10 @@
 // Package protogen assists on making Go protoc plugins for any language
 package protogen
 
-import "google.golang.org/protobuf/types/pluginpb"
+import (
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/pluginpb"
+)
 
 // Handler uses Generator to generate code
 type Handler func(Generator) error
@@ -27,6 +30,34 @@ type Generator interface {
 	Param(string) (string, bool)
 	// Params returns all specified parameters
 	Params() map[string]string
+
+	// Files returns a slice of all source proto files
+	Files() []FileDescriptor
+	// ForEachFile calls a function for each source proto file
+	ForEachFile(func(FileDescriptor))
+}
+
+// FileDescriptor represents a source proto file
+type FileDescriptor interface {
+	RequestDescriptor
+
+	// Proto returns the underlying protobuf structure
+	Proto() *descriptorpb.FileDescriptorProto
+
+	// Generate indicates the file was directly specified when
+	// calling protoc
+	Generate() bool
+
+	// Name returns the full file name of proto file
+	Name() string
+	// Base returns the name of the proto file including directory
+	// but excluding extensions
+	Base() string
+	// Package returns the package name associated to this file
+	Package() string
+	// PackageDirectory returns the package name associated to this file
+	// converted to a directory path
+	PackageDirectory() string
 }
 
 // Run handles the protoc plugin protocol using the provided
