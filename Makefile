@@ -1,4 +1,4 @@
-.PHONY: all clean generate fmt tidy
+.PHONY: all clean install generate fmt tidy
 .PHONY: FORCE
 
 GO ?= go
@@ -28,6 +28,9 @@ GO_BUILD = $(GO) build -v
 GO_BUILD_CMD = $(GO_BUILD) -o "$(OUTDIR)"
 
 all: get generate tidy build
+
+install:
+	$Q $(GO) install -v ./cmd/...
 
 clean: ; $(info $(M) cleaning…)
 	rm -rf $(TMPDIR)
