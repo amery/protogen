@@ -60,6 +60,9 @@ type FileDescriptor interface {
 	// PackageDirectory returns the package name associated to this file
 	// converted to a directory path
 	PackageDirectory() string
+
+	// Dependencies returns the source proto files this one depends on
+	Dependencies() []FileDescriptor
 }
 
 // Run handles the protoc plugin protocol using the provided

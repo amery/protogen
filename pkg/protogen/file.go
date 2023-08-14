@@ -94,6 +94,15 @@ func (f *File) PackageDirectory() string {
 	return strings.ReplaceAll(s, ".", sep)
 }
 
+// Dependencies returns the source proto files this one depends on
+func (f *File) Dependencies() []FileDescriptor {
+	out := make([]FileDescriptor, len(f.fdp.Dependency))
+	for i, fn := range f.fdp.Dependency {
+		out[i] = f.gen.getFileByName(fn)
+	}
+	return out
+}
+
 // Files returns a slice of all source proto files
 func (gen *Plugin) Files() []FileDescriptor {
 	return gen.files
