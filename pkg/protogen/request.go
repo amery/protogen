@@ -2,6 +2,7 @@ package protogen
 
 import (
 	"io"
+	"strings"
 
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -30,6 +31,56 @@ func UnmarshalCodeGeneratorRequest(r io.Reader) (*pluginpb.CodeGeneratorRequest,
 
 func (gen *Plugin) loadRequest(req *pluginpb.CodeGeneratorRequest) error {
 	// TODO: populate Plugin in a useful way
+	if err := gen.loadParams(req.Parameter); err != nil {
+		return err
+	}
+
 	gen.req = req
 	return nil
+}
+
+// Param returns the value of a parameter if specified
+func (gen *Plugin) Param(key string) (string, bool) {
+	value, found := gen.params[key]
+	return value, found
+}
+
+// Params returns all specified parameters
+func (gen *Plugin) Params() map[string]string {
+	return gen.params
+}
+
+func (gen *Plugin) loadParams(params *string) error {
+	gen.params = make(map[string]string)
+
+	if params == nil {
+		return nil
+	}
+
+	s := strings.Split(*params, ",")
+	for _, param := range s {
+		k, v, found := strings.Cut(param, "=")
+		if !found {
+			v = "true"
+		}
+
+		err := gen.setParam(k, v)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (gen *Plugin) setParam(k, v string) error {
+	var err error
+
+	gen.params[k] = v
+
+	if gen.options.ParamFunc != nil {
+		err = gen.options.ParamFunc(k, v)
+	}
+
+	return err
 }

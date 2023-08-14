@@ -22,6 +22,11 @@ type Generator interface {
 	Println(...any)
 	// Printf logs an error in the manner of fmt.Printf
 	Printf(string, ...any)
+
+	// Param returns the value of a parameter if specified
+	Param(string) (string, bool)
+	// Params returns all specified parameters
+	Params() map[string]string
 }
 
 // Run handles the protoc plugin protocol using the provided

@@ -15,6 +15,7 @@ type Plugin struct {
 	options Options
 	req     *pluginpb.CodeGeneratorRequest
 	resp    pluginpb.CodeGeneratorResponse
+	params  map[string]string
 }
 
 func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {
