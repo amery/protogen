@@ -15,6 +15,7 @@ var (
 // Enum represents an enumeration type
 type Enum struct {
 	file *File
+	msg  *Message
 	dp   *descriptorpb.EnumDescriptorProto
 
 	values   []*EnumValue
@@ -24,7 +25,7 @@ type Enum struct {
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
 // the [Plugin]
 func (p *Enum) Request() *pluginpb.CodeGeneratorRequest {
-	return p.file.Request()
+	return p.File().Request()
 }
 
 // Proto returns the underlying protobuf structure
@@ -34,12 +35,19 @@ func (p *Enum) Proto() *descriptorpb.EnumDescriptorProto {
 
 // File returns the [File] that defines this type
 func (p *Enum) File() *File {
-	return p.file
+	switch {
+	case p.file != nil:
+		return p.file
+	case p.msg != nil:
+		return p.msg.File()
+	default:
+		panic("unreachable")
+	}
 }
 
 // Package returns the package name associated to this type
 func (p *Enum) Package() string {
-	return p.file.Package()
+	return p.File().Package()
 }
 
 // Name returns the relative name of this type
@@ -49,7 +57,14 @@ func (p *Enum) Name() string {
 
 // FullName returns the fully qualified name of this type
 func (p *Enum) FullName() string {
-	s0 := p.file.Package()
+	var s0 string
+	switch {
+	case p.msg != nil:
+		s0 = p.msg.FullName()
+	case p.file != nil:
+		s0 = p.file.Package()
+	}
+
 	s1 := p.Name()
 
 	switch {
@@ -174,6 +189,40 @@ func (p *Enum) newValue(dp *descriptorpb.EnumValueDescriptorProto, next int32) i
 	return cur + 1
 }
 
+// Enums returns all the [Enum] types local to this Message
+func (p *Message) Enums() []*Enum {
+	if p.enums == nil {
+		p.loadEnums()
+	}
+	return p.enums
+}
+
+func (p *Message) loadEnums() {
+	out := make([]*Enum, 0, len(p.dp.EnumType))
+	for _, dp := range p.dp.EnumType {
+		if dp == nil {
+			continue
+		}
+
+		pe := &Enum{
+			msg: p,
+			dp:  dp,
+		}
+
+		pe.init()
+		out = append(out, pe)
+	}
+
+	// sort enums by name
+	sort.SliceStable(out, func(i, j int) bool {
+		a := out[i].Name()
+		b := out[j].Name()
+		return a < b
+	})
+
+	p.enums = out
+}
+
 // Enums returns all the [Enum] types defined on this file
 func (f *File) Enums() []*Enum {
 	if f.enums == nil {
@@ -212,13 +261,13 @@ func (f *File) loadEnums() {
 			continue
 		}
 
-		p := &Enum{
+		pe := &Enum{
 			file: f,
 			dp:   dp,
 		}
 
-		p.init()
-		out = append(out, p)
+		pe.init()
+		out = append(out, pe)
 	}
 
 	// sort enums by name

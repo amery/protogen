@@ -15,6 +15,8 @@ var (
 type Message struct {
 	file *File
 	dp   *descriptorpb.DescriptorProto
+
+	enums []*Enum
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
