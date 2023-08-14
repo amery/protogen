@@ -1,6 +1,8 @@
 package protogen
 
 import (
+	"sort"
+
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -98,5 +100,13 @@ func (f *File) loadMessages() {
 
 		out = append(out, p)
 	}
+
+	// sort enums by name
+	sort.SliceStable(out, func(i, j int) bool {
+		a := out[i].Name()
+		b := out[j].Name()
+		return a < b
+	})
+
 	f.messages = out
 }
