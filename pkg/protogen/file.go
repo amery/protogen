@@ -140,9 +140,6 @@ func (gen *Plugin) loadFiles(files ...*descriptorpb.FileDescriptorProto) {
 			gen: gen,
 		}
 
-		f.loadEnums()
-		f.loadMessages()
-
 		gen.files = append(gen.files, f)
 	}
 }

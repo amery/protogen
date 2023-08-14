@@ -56,6 +56,9 @@ func (p *MessageDescriptor) FullName() string {
 
 // Messages returns all the [Message] types defined on this file
 func (f *FileDescriptor) Messages() []Message {
+	if f.messages == nil {
+		f.loadMessages()
+	}
 	return f.messages
 }
 

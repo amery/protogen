@@ -56,6 +56,9 @@ func (p *EnumDescriptor) FullName() string {
 
 // Enums returns all the [Enum] types defined on this file
 func (f *FileDescriptor) Enums() []Enum {
+	if f.enums == nil {
+		f.loadEnums()
+	}
 	return f.enums
 }
 
