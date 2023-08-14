@@ -63,6 +63,33 @@ type FileDescriptor interface {
 
 	// Dependencies returns the source proto files this one depends on
 	Dependencies() []FileDescriptor
+
+	// Enums returns all the [Enum] types defined on this file
+	Enums() []EnumDescriptor
+	// EnumByName finds a [Enum] by name
+	EnumByName(string) EnumDescriptor
+}
+
+// TypeDescriptor is the common abstraction for types defined on a proto file
+type TypeDescriptor interface {
+	RequestDescriptor
+
+	// File returns the [File] that defines this type
+	File() FileDescriptor
+	// Package returns the package name associated to this type
+	Package() string
+	// Name returns the relative name of this type
+	Name() string
+	// FullName returns the fully qualified name of this type
+	FullName() string
+}
+
+// EnumDescriptor represents an Enum type
+type EnumDescriptor interface {
+	TypeDescriptor
+
+	// Proto returns the underlying protobuf structure
+	Proto() *descriptorpb.EnumDescriptorProto
 }
 
 // Run handles the protoc plugin protocol using the provided
