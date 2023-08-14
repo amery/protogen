@@ -220,5 +220,13 @@ func (f *File) loadEnums() {
 		p.init()
 		out = append(out, p)
 	}
+
+	// sort enums by name
+	sort.SliceStable(out, func(i, j int) bool {
+		a := out[i].Name()
+		b := out[j].Name()
+		return a < b
+	})
+
 	f.enums = out
 }
