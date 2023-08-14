@@ -15,7 +15,8 @@ type Enum struct {
 	file *File
 	dp   *descriptorpb.EnumDescriptorProto
 
-	values []*EnumValue
+	values   []*EnumValue
+	min, max int32
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
@@ -62,23 +63,32 @@ func (p *Enum) Values() []*EnumValue {
 	return p.values
 }
 
-func (p *Enum) init() {
-	out := make([]*EnumValue, 0, len(p.dp.Value))
-	for _, dp := range p.dp.Value {
-		p := &EnumValue{
-			enum: p,
-			dp:   dp,
-		}
+// Minimum returns the minimum numeric value used on this Enum
+func (p *Enum) Minimum() int {
+	return int(p.min)
+}
 
-		out = append(out, p)
+// Maximum returns the maximum numeric value used on this Enum
+func (p *Enum) Maximum() int {
+	return int(p.max)
+}
+
+func (p *Enum) init() {
+	var next int32
+
+	p.values = make([]*EnumValue, 0, len(p.dp.Value))
+
+	for _, dp := range p.dp.Value {
+		next = p.newValue(dp, next)
 	}
-	p.values = out
 }
 
 // EnumValue represents a possible value of a [Enum]
 type EnumValue struct {
 	enum *Enum
 	dp   *descriptorpb.EnumValueDescriptorProto
+
+	number int32
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
@@ -123,6 +133,36 @@ func (p *EnumValue) FullName() string {
 	default:
 		return s1
 	}
+}
+
+// Number returns the integer representation of the EnumValue
+func (p *EnumValue) Number() int {
+	return int(p.number)
+}
+
+func (p *Enum) newValue(dp *descriptorpb.EnumValueDescriptorProto, next int32) int32 {
+	cur := optional(dp.Number, next)
+
+	v := &EnumValue{
+		enum:   p,
+		dp:     dp,
+		number: cur,
+	}
+
+	switch {
+	case len(p.values) == 0:
+		// first
+		p.min, p.max = cur, cur
+	case cur > p.max:
+		// new max
+		p.max = cur
+	case cur < p.min:
+		// new min
+		p.min = cur
+	}
+
+	p.values = append(p.values, v)
+	return cur + 1
 }
 
 // Enums returns all the [Enum] types defined on this file
