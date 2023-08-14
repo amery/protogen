@@ -68,6 +68,9 @@ type File interface {
 	Enums() []Enum
 	// EnumByName finds a [Enum] by name
 	EnumByName(string) Enum
+
+	Messages() []Message
+	MessageByName(string) Message
 }
 
 // ProtoTyper is the common abstraction for types defined on a proto file
@@ -82,6 +85,14 @@ type ProtoTyper interface {
 	Name() string
 	// FullName returns the fully qualified name of this type
 	FullName() string
+}
+
+// Message reprensets a Message type
+type Message interface {
+	ProtoTyper
+
+	// Proto returns the underlying protobuf structure
+	Proto() *descriptorpb.DescriptorProto
 }
 
 // Enum represents an Enum type

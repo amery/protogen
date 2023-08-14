@@ -21,7 +21,8 @@ type FileDescriptor struct {
 
 	generate bool
 
-	enums []Enum
+	enums    []Enum
+	messages []Message
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
@@ -140,6 +141,7 @@ func (gen *Plugin) loadFiles(files ...*descriptorpb.FileDescriptorProto) {
 		}
 
 		f.loadEnums()
+		f.loadMessages()
 
 		gen.files = append(gen.files, f)
 	}
