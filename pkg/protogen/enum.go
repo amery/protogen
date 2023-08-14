@@ -6,46 +6,46 @@ import (
 )
 
 var (
-	_ Enum      = (*EnumDescriptor)(nil)
-	_ EnumValue = (*EnumValueDescriptor)(nil)
+	_ ProtoTyper = (*Enum)(nil)
+	_ ProtoTyper = (*EnumValue)(nil)
 )
 
-// EnumDescriptor is the implementation of Enum
-type EnumDescriptor struct {
-	file *FileDescriptor
+// Enum represents an enumeration type
+type Enum struct {
+	file *File
 	dp   *descriptorpb.EnumDescriptorProto
 
-	values []EnumValue
+	values []*EnumValue
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
 // the [Plugin]
-func (p *EnumDescriptor) Request() *pluginpb.CodeGeneratorRequest {
+func (p *Enum) Request() *pluginpb.CodeGeneratorRequest {
 	return p.file.Request()
 }
 
 // Proto returns the underlying protobuf structure
-func (p *EnumDescriptor) Proto() *descriptorpb.EnumDescriptorProto {
+func (p *Enum) Proto() *descriptorpb.EnumDescriptorProto {
 	return p.dp
 }
 
 // File returns the [File] that defines this type
-func (p *EnumDescriptor) File() File {
+func (p *Enum) File() *File {
 	return p.file
 }
 
 // Package returns the package name associated to this type
-func (p *EnumDescriptor) Package() string {
+func (p *Enum) Package() string {
 	return p.file.Package()
 }
 
 // Name returns the relative name of this type
-func (p *EnumDescriptor) Name() string {
+func (p *Enum) Name() string {
 	return optional(p.dp.Name, "")
 }
 
 // FullName returns the fully qualified name of this type
-func (p *EnumDescriptor) FullName() string {
+func (p *Enum) FullName() string {
 	s0 := p.file.Package()
 	s1 := p.Name()
 
@@ -58,14 +58,14 @@ func (p *EnumDescriptor) FullName() string {
 }
 
 // Values returns the possible values for this type
-func (p *EnumDescriptor) Values() []EnumValue {
+func (p *Enum) Values() []*EnumValue {
 	return p.values
 }
 
-func (p *EnumDescriptor) init() {
-	out := make([]EnumValue, 0, len(p.dp.Value))
+func (p *Enum) init() {
+	out := make([]*EnumValue, 0, len(p.dp.Value))
 	for _, dp := range p.dp.Value {
-		p := &EnumValueDescriptor{
+		p := &EnumValue{
 			enum: p,
 			dp:   dp,
 		}
@@ -75,45 +75,45 @@ func (p *EnumDescriptor) init() {
 	p.values = out
 }
 
-// EnumValueDescriptor is the implementation of EnumValue
-type EnumValueDescriptor struct {
-	enum *EnumDescriptor
+// EnumValue represents a possible value of a [Enum]
+type EnumValue struct {
+	enum *Enum
 	dp   *descriptorpb.EnumValueDescriptorProto
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
 // the [Plugin]
-func (p *EnumValueDescriptor) Request() *pluginpb.CodeGeneratorRequest {
+func (p *EnumValue) Request() *pluginpb.CodeGeneratorRequest {
 	return p.enum.Request()
 }
 
 // Proto returns the underlying protobuf structure
-func (p *EnumValueDescriptor) Proto() *descriptorpb.EnumValueDescriptorProto {
+func (p *EnumValue) Proto() *descriptorpb.EnumValueDescriptorProto {
 	return p.dp
 }
 
 // File returns the [File] associates to this value type
-func (p *EnumValueDescriptor) File() File {
+func (p *EnumValue) File() *File {
 	return p.enum.File()
 }
 
 // Package returns the package name associated to this type
-func (p *EnumValueDescriptor) Package() string {
+func (p *EnumValue) Package() string {
 	return p.enum.Package()
 }
 
 // Enum returns the [Enum] associates to this value type
-func (p *EnumValueDescriptor) Enum() Enum {
+func (p *EnumValue) Enum() *Enum {
 	return p.enum
 }
 
 // Name returns the relative name of this value type
-func (p *EnumValueDescriptor) Name() string {
+func (p *EnumValue) Name() string {
 	return optional(p.dp.Name, "")
 }
 
 // FullName returns the fully qualified name of this value type
-func (p *EnumValueDescriptor) FullName() string {
+func (p *EnumValue) FullName() string {
 	s0 := p.enum.FullName()
 	s1 := p.Name()
 
@@ -126,7 +126,7 @@ func (p *EnumValueDescriptor) FullName() string {
 }
 
 // Enums returns all the [Enum] types defined on this file
-func (f *FileDescriptor) Enums() []Enum {
+func (f *File) Enums() []*Enum {
 	if f.enums == nil {
 		f.loadEnums()
 	}
@@ -134,7 +134,7 @@ func (f *FileDescriptor) Enums() []Enum {
 }
 
 // EnumByName finds a [Enum] by name
-func (f *FileDescriptor) EnumByName(name string) Enum {
+func (f *File) EnumByName(name string) *Enum {
 	pkgname, name, _ := SplitName(name)
 
 	switch {
@@ -156,14 +156,14 @@ func (f *FileDescriptor) EnumByName(name string) Enum {
 	}
 }
 
-func (f *FileDescriptor) loadEnums() {
-	out := make([]Enum, 0, len(f.dp.EnumType))
+func (f *File) loadEnums() {
+	out := make([]*Enum, 0, len(f.dp.EnumType))
 	for _, dp := range f.dp.EnumType {
 		if dp == nil {
 			continue
 		}
 
-		p := &EnumDescriptor{
+		p := &Enum{
 			file: f,
 			dp:   dp,
 		}

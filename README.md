@@ -12,7 +12,7 @@ opts := &protogen.Options{
     // ...
 }
 
-err := opts.Run(func (gen protogen.Generator) error {
+err := opts.Run(func (gen *protogen.Plugin) error {
     // ...
 })
 if err != nil {

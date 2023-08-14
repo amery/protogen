@@ -6,43 +6,43 @@ import (
 )
 
 var (
-	_ Message = (*MessageDescriptor)(nil)
+	_ ProtoTyper = (*Message)(nil)
 )
 
-// MessageDescriptor implements Message
-type MessageDescriptor struct {
-	file *FileDescriptor
+// Message represents a type
+type Message struct {
+	file *File
 	dp   *descriptorpb.DescriptorProto
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
 // the [Plugin]
-func (p *MessageDescriptor) Request() *pluginpb.CodeGeneratorRequest {
+func (p *Message) Request() *pluginpb.CodeGeneratorRequest {
 	return p.file.Request()
 }
 
 // Proto returns the underlying protobuf structure
-func (p *MessageDescriptor) Proto() *descriptorpb.DescriptorProto {
+func (p *Message) Proto() *descriptorpb.DescriptorProto {
 	return p.dp
 }
 
 // File returns the [File] that defines this type
-func (p *MessageDescriptor) File() File {
+func (p *Message) File() *File {
 	return p.file
 }
 
 // Package returns the package name associated to this type
-func (p *MessageDescriptor) Package() string {
+func (p *Message) Package() string {
 	return p.file.Package()
 }
 
 // Name returns the relative name of this type
-func (p *MessageDescriptor) Name() string {
+func (p *Message) Name() string {
 	return optional(p.dp.Name, "")
 }
 
 // FullName returns the fully qualified name of this type
-func (p *MessageDescriptor) FullName() string {
+func (p *Message) FullName() string {
 	s0 := p.file.Package()
 	s1 := p.Name()
 
@@ -55,7 +55,7 @@ func (p *MessageDescriptor) FullName() string {
 }
 
 // Messages returns all the [Message] types defined on this file
-func (f *FileDescriptor) Messages() []Message {
+func (f *File) Messages() []*Message {
 	if f.messages == nil {
 		f.loadMessages()
 	}
@@ -63,7 +63,7 @@ func (f *FileDescriptor) Messages() []Message {
 }
 
 // MessageByName find a [Message] by name
-func (f *FileDescriptor) MessageByName(name string) Message {
+func (f *File) MessageByName(name string) *Message {
 	pkgname, name, _ := SplitName(name)
 
 	switch {
@@ -84,14 +84,14 @@ func (f *FileDescriptor) MessageByName(name string) Message {
 	}
 }
 
-func (f *FileDescriptor) loadMessages() {
-	out := make([]Message, 0, len(f.dp.MessageType))
+func (f *File) loadMessages() {
+	out := make([]*Message, 0, len(f.dp.MessageType))
 	for _, dp := range f.dp.MessageType {
 		if dp == nil {
 			continue
 		}
 
-		p := &MessageDescriptor{
+		p := &Message{
 			file: f,
 			dp:   dp,
 		}
