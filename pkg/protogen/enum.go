@@ -1,6 +1,8 @@
 package protogen
 
 import (
+	"sort"
+
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -81,6 +83,13 @@ func (p *Enum) init() {
 	for _, dp := range p.dp.Value {
 		next = p.newValue(dp, next)
 	}
+
+	// sort values
+	sort.SliceStable(p.values, func(i, j int) bool {
+		a := p.values[i].Number()
+		b := p.values[j].Number()
+		return a < b
+	})
 }
 
 // EnumValue represents a possible value of a [Enum]
