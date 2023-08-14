@@ -17,7 +17,7 @@ type Plugin struct {
 	resp    pluginpb.CodeGeneratorResponse
 
 	params map[string]string
-	files  []FileDescriptor
+	files  []File
 }
 
 func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {

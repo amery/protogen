@@ -11,33 +11,33 @@ import (
 )
 
 var (
-	_ FileDescriptor = (*File)(nil)
+	_ File = (*FileDescriptor)(nil)
 )
 
-// File is the base foundation of a FileDescriptor
-type File struct {
+// FileDescriptor implements a File
+type FileDescriptor struct {
 	gen *Plugin
 	dp  *descriptorpb.FileDescriptorProto
 
 	generate bool
 
-	enums []EnumDescriptor
+	enums []Enum
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
 // the [Plugin]
-func (f *File) Request() *pluginpb.CodeGeneratorRequest {
+func (f *FileDescriptor) Request() *pluginpb.CodeGeneratorRequest {
 	return f.gen.Request()
 }
 
 // Proto returns the underlying protobuf structure
-func (f *File) Proto() *descriptorpb.FileDescriptorProto {
+func (f *FileDescriptor) Proto() *descriptorpb.FileDescriptorProto {
 	return f.dp
 }
 
 // Generate indicates the file was directly specified when
 // calling protoc
-func (f *File) Generate() bool {
+func (f *FileDescriptor) Generate() bool {
 	return f.generate
 }
 
@@ -65,13 +65,13 @@ func (gen *Plugin) setFileGenerate(filename string) bool {
 }
 
 // Name returns the full file name of proto file
-func (f *File) Name() string {
+func (f *FileDescriptor) Name() string {
 	return optional(f.dp.Name, "")
 }
 
 // Base returns the name of the proto file including directory
 // but excluding extensions
-func (f *File) Base() string {
+func (f *FileDescriptor) Base() string {
 	name := f.Name()
 	if ext := filepath.Ext(name); ext != "" {
 		return strings.TrimSuffix(name, ext)
@@ -80,13 +80,13 @@ func (f *File) Base() string {
 }
 
 // Package returns the package name associated to this file
-func (f *File) Package() string {
+func (f *FileDescriptor) Package() string {
 	return optional(f.dp.Package, "")
 }
 
 // PackageDirectory returns the package name associated to this file
 // converted to a directory path
-func (f *File) PackageDirectory() string {
+func (f *FileDescriptor) PackageDirectory() string {
 	s := optional(f.dp.Package, "")
 	if s == "" {
 		return "."
@@ -97,8 +97,8 @@ func (f *File) PackageDirectory() string {
 }
 
 // Dependencies returns the source proto files this one depends on
-func (f *File) Dependencies() []FileDescriptor {
-	out := make([]FileDescriptor, len(f.dp.Dependency))
+func (f *FileDescriptor) Dependencies() []File {
+	out := make([]File, len(f.dp.Dependency))
 	for i, fn := range f.dp.Dependency {
 		out[i] = f.gen.getFileByName(fn)
 	}
@@ -106,26 +106,26 @@ func (f *File) Dependencies() []FileDescriptor {
 }
 
 // Files returns a slice of all source proto files
-func (gen *Plugin) Files() []FileDescriptor {
+func (gen *Plugin) Files() []File {
 	return gen.files
 }
 
 // ForEachFile calls a function for each source proto file
-func (gen *Plugin) ForEachFile(fn func(FileDescriptor)) {
+func (gen *Plugin) ForEachFile(fn func(File)) {
 	for _, f := range gen.files {
 		fn(f)
 	}
 }
 
 // FileByName returns a source proto file by name
-func (gen *Plugin) FileByName(filename string) FileDescriptor {
+func (gen *Plugin) FileByName(filename string) File {
 	return gen.getFileByName(filename)
 }
 
-func (gen *Plugin) getFileByName(filename string) *File {
+func (gen *Plugin) getFileByName(filename string) *FileDescriptor {
 	for _, f := range gen.files {
 		if f.Name() == filename {
-			return f.(*File)
+			return f.(*FileDescriptor)
 		}
 	}
 
@@ -134,7 +134,7 @@ func (gen *Plugin) getFileByName(filename string) *File {
 
 func (gen *Plugin) loadFiles(files ...*descriptorpb.FileDescriptorProto) {
 	for _, dp := range files {
-		f := &File{
+		f := &FileDescriptor{
 			dp:  dp,
 			gen: gen,
 		}

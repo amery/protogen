@@ -6,43 +6,43 @@ import (
 )
 
 var (
-	_ EnumDescriptor = (*Enum)(nil)
+	_ Enum = (*EnumDescriptor)(nil)
 )
 
-// Enum is the implementation of EnumDescriptor
-type Enum struct {
-	file *File
+// EnumDescriptor is the implementation of Enum
+type EnumDescriptor struct {
+	file *FileDescriptor
 	dp   *descriptorpb.EnumDescriptorProto
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
 // the [Plugin]
-func (p *Enum) Request() *pluginpb.CodeGeneratorRequest {
+func (p *EnumDescriptor) Request() *pluginpb.CodeGeneratorRequest {
 	return p.file.Request()
 }
 
 // Proto returns the underlying protobuf structure
-func (p *Enum) Proto() *descriptorpb.EnumDescriptorProto {
+func (p *EnumDescriptor) Proto() *descriptorpb.EnumDescriptorProto {
 	return p.dp
 }
 
 // File returns the [File] that defines this type
-func (p *Enum) File() FileDescriptor {
+func (p *EnumDescriptor) File() File {
 	return p.file
 }
 
 // Package returns the package name associated to this type
-func (p *Enum) Package() string {
+func (p *EnumDescriptor) Package() string {
 	return p.file.Package()
 }
 
 // Name returns the relative name of this type
-func (p *Enum) Name() string {
+func (p *EnumDescriptor) Name() string {
 	return optional(p.dp.Name, "")
 }
 
 // FullName returns the fully qualified name of this type
-func (p *Enum) FullName() string {
+func (p *EnumDescriptor) FullName() string {
 	s0 := p.file.Package()
 	s1 := p.Name()
 
@@ -55,12 +55,12 @@ func (p *Enum) FullName() string {
 }
 
 // Enums returns all the [Enum] types defined on this file
-func (f *File) Enums() []EnumDescriptor {
+func (f *FileDescriptor) Enums() []Enum {
 	return f.enums
 }
 
 // EnumByName finds a [Enum] by name
-func (f *File) EnumByName(name string) EnumDescriptor {
+func (f *FileDescriptor) EnumByName(name string) Enum {
 	pkgname, name, _ := SplitName(name)
 
 	switch {
@@ -82,14 +82,14 @@ func (f *File) EnumByName(name string) EnumDescriptor {
 	}
 }
 
-func (f *File) loadEnums() {
-	out := make([]EnumDescriptor, 0, len(f.dp.EnumType))
+func (f *FileDescriptor) loadEnums() {
+	out := make([]Enum, 0, len(f.dp.EnumType))
 	for _, dp := range f.dp.EnumType {
 		if dp == nil {
 			continue
 		}
 
-		p := &Enum{
+		p := &EnumDescriptor{
 			file: f,
 			dp:   dp,
 		}

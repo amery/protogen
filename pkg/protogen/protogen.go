@@ -9,15 +9,15 @@ import (
 // Handler uses Generator to generate code
 type Handler func(Generator) error
 
-// RequestDescriptor is the abstraction of an element on the Request
-type RequestDescriptor interface {
+// ProtoRequester is the abstraction of an element on the Request
+type ProtoRequester interface {
 	// Request returns the received [pluginpb.CodeGeneratorRequest]
 	Request() *pluginpb.CodeGeneratorRequest
 }
 
 // Generator is the interface implemented by our Plugin for the Handler
 type Generator interface {
-	RequestDescriptor
+	ProtoRequester
 
 	// Print logs an error in the manner of fmt.Print
 	Print(...any)
@@ -32,16 +32,16 @@ type Generator interface {
 	Params() map[string]string
 
 	// Files returns a slice of all source proto files
-	Files() []FileDescriptor
+	Files() []File
 	// ForEachFile calls a function for each source proto file
-	ForEachFile(func(FileDescriptor))
+	ForEachFile(func(File))
 	// FileByName returns a source proto file by name
-	FileByName(string) FileDescriptor
+	FileByName(string) File
 }
 
-// FileDescriptor represents a source proto file
-type FileDescriptor interface {
-	RequestDescriptor
+// File represents a source proto file
+type File interface {
+	ProtoRequester
 
 	// Proto returns the underlying protobuf structure
 	Proto() *descriptorpb.FileDescriptorProto
@@ -62,20 +62,20 @@ type FileDescriptor interface {
 	PackageDirectory() string
 
 	// Dependencies returns the source proto files this one depends on
-	Dependencies() []FileDescriptor
+	Dependencies() []File
 
 	// Enums returns all the [Enum] types defined on this file
-	Enums() []EnumDescriptor
+	Enums() []Enum
 	// EnumByName finds a [Enum] by name
-	EnumByName(string) EnumDescriptor
+	EnumByName(string) Enum
 }
 
-// TypeDescriptor is the common abstraction for types defined on a proto file
-type TypeDescriptor interface {
-	RequestDescriptor
+// ProtoTyper is the common abstraction for types defined on a proto file
+type ProtoTyper interface {
+	ProtoRequester
 
 	// File returns the [File] that defines this type
-	File() FileDescriptor
+	File() File
 	// Package returns the package name associated to this type
 	Package() string
 	// Name returns the relative name of this type
@@ -84,9 +84,9 @@ type TypeDescriptor interface {
 	FullName() string
 }
 
-// EnumDescriptor represents an Enum type
-type EnumDescriptor interface {
-	TypeDescriptor
+// Enum represents an Enum type
+type Enum interface {
+	ProtoTyper
 
 	// Proto returns the underlying protobuf structure
 	Proto() *descriptorpb.EnumDescriptorProto
