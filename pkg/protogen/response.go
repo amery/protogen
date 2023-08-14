@@ -28,6 +28,18 @@ func MarshalCodeGeneratorResponse(resp *pluginpb.CodeGeneratorResponse,
 	return buf.WriteTo(w)
 }
 
+// MarshalCodeGeneratorErrorResponse writes the proto encoded representation of
+// given error
+func MarshalCodeGeneratorErrorResponse(err error, w io.Writer) (int64, error) {
+	s := err.Error()
+
+	resp := &pluginpb.CodeGeneratorResponse{
+		Error: &s,
+	}
+
+	return MarshalCodeGeneratorResponse(resp, w)
+}
+
 // WriteTo writes the generated [pluginpb.CodeGeneratorResponse] to the
 // provided [io.Writer]
 func (gen *Plugin) WriteTo(w io.Writer) (int64, error) {
@@ -38,19 +50,7 @@ func (gen *Plugin) Write() (int64, error) {
 	return gen.WriteTo(gen.options.Stdout)
 }
 
-// WriteErrorTo generates an error response and writes it to the
-// provided [io.Writer]
-func (*Plugin) WriteErrorTo(err error, w io.Writer) (int64, error) {
-	s := err.Error()
-
-	resp := &pluginpb.CodeGeneratorResponse{
-		Error: &s,
-	}
-
-	return MarshalCodeGeneratorResponse(resp, w)
-}
-
 // WriteError generates an error response and writes it to Stdout
 func (gen *Plugin) WriteError(err error) (int64, error) {
-	return gen.WriteErrorTo(err, gen.options.Stdout)
+	return MarshalCodeGeneratorErrorResponse(err, gen.options.Stdout)
 }
