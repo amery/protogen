@@ -31,7 +31,7 @@ func UnmarshalCodeGeneratorRequest(r io.Reader) (*pluginpb.CodeGeneratorRequest,
 
 func (gen *Plugin) loadRequest(req *pluginpb.CodeGeneratorRequest) error {
 	// TODO: populate Plugin in a useful way
-	if err := gen.loadParams(req.Parameter); err != nil {
+	if err := gen.loadParams(optional(req.Parameter, "")); err != nil {
 		return err
 	}
 
@@ -50,14 +50,10 @@ func (gen *Plugin) Params() map[string]string {
 	return gen.params
 }
 
-func (gen *Plugin) loadParams(params *string) error {
+func (gen *Plugin) loadParams(params string) error {
 	gen.params = make(map[string]string)
 
-	if params == nil {
-		return nil
-	}
-
-	s := strings.Split(*params, ",")
+	s := strings.Split(params, ",")
 	for _, param := range s {
 		k, v, found := strings.Cut(param, "=")
 		if !found {
