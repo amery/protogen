@@ -6,13 +6,16 @@ import (
 )
 
 var (
-	_ Enum = (*EnumDescriptor)(nil)
+	_ Enum      = (*EnumDescriptor)(nil)
+	_ EnumValue = (*EnumValueDescriptor)(nil)
 )
 
 // EnumDescriptor is the implementation of Enum
 type EnumDescriptor struct {
 	file *FileDescriptor
 	dp   *descriptorpb.EnumDescriptorProto
+
+	values []EnumValue
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
@@ -44,6 +47,74 @@ func (p *EnumDescriptor) Name() string {
 // FullName returns the fully qualified name of this type
 func (p *EnumDescriptor) FullName() string {
 	s0 := p.file.Package()
+	s1 := p.Name()
+
+	switch {
+	case s0 != "" && s1 != "":
+		return s0 + "." + s1
+	default:
+		return s1
+	}
+}
+
+// Values returns the possible values for this type
+func (p *EnumDescriptor) Values() []EnumValue {
+	return p.values
+}
+
+func (p *EnumDescriptor) init() {
+	out := make([]EnumValue, 0, len(p.dp.Value))
+	for _, dp := range p.dp.Value {
+		p := &EnumValueDescriptor{
+			enum: p,
+			dp:   dp,
+		}
+
+		out = append(out, p)
+	}
+	p.values = out
+}
+
+// EnumValueDescriptor is the implementation of EnumValue
+type EnumValueDescriptor struct {
+	enum *EnumDescriptor
+	dp   *descriptorpb.EnumValueDescriptorProto
+}
+
+// Request returns the [pluginpb.CodeGeneratorRequest] received by
+// the [Plugin]
+func (p *EnumValueDescriptor) Request() *pluginpb.CodeGeneratorRequest {
+	return p.enum.Request()
+}
+
+// Proto returns the underlying protobuf structure
+func (p *EnumValueDescriptor) Proto() *descriptorpb.EnumValueDescriptorProto {
+	return p.dp
+}
+
+// File returns the [File] associates to this value type
+func (p *EnumValueDescriptor) File() File {
+	return p.enum.File()
+}
+
+// Package returns the package name associated to this type
+func (p *EnumValueDescriptor) Package() string {
+	return p.enum.Package()
+}
+
+// Enum returns the [Enum] associates to this value type
+func (p *EnumValueDescriptor) Enum() Enum {
+	return p.enum
+}
+
+// Name returns the relative name of this value type
+func (p *EnumValueDescriptor) Name() string {
+	return optional(p.dp.Name, "")
+}
+
+// FullName returns the fully qualified name of this value type
+func (p *EnumValueDescriptor) FullName() string {
+	s0 := p.enum.FullName()
 	s1 := p.Name()
 
 	switch {
@@ -97,6 +168,7 @@ func (f *FileDescriptor) loadEnums() {
 			dp:   dp,
 		}
 
+		p.init()
 		out = append(out, p)
 	}
 	f.enums = out

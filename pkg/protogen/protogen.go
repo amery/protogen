@@ -101,6 +101,20 @@ type Enum interface {
 
 	// Proto returns the underlying protobuf structure
 	Proto() *descriptorpb.EnumDescriptorProto
+
+	// Values returns the possible values for this type
+	Values() []EnumValue
+}
+
+// EnumValue represents a value of a Enum type
+type EnumValue interface {
+	ProtoTyper
+
+	// Proto returns the underlying protobuf structure
+	Proto() *descriptorpb.EnumValueDescriptorProto
+
+	// Enum returns the Enum type this value belongs to
+	Enum() Enum
 }
 
 // Run handles the protoc plugin protocol using the provided
