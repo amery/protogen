@@ -35,6 +35,8 @@ type Generator interface {
 	Files() []FileDescriptor
 	// ForEachFile calls a function for each source proto file
 	ForEachFile(func(FileDescriptor))
+	// FileByName returns a source proto file by name
+	FileByName(string) FileDescriptor
 }
 
 // FileDescriptor represents a source proto file

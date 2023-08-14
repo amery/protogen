@@ -54,23 +54,11 @@ func (gen *Plugin) setFilesGenerate(files ...string) error {
 }
 
 func (gen *Plugin) setFileGenerate(fn1 string) bool {
-	for _, f := range gen.files {
-		file, ok := f.(*File)
-		if !ok {
-			continue
-		}
-
-		fn2, ok := optional2(file.fdp.Name, "")
-		if !ok {
-			continue
-		}
-
-		if fn1 == fn2 {
-			file.generate = true
-			return true
-		}
+	file := gen.getFileByName(fn1)
+	if file != nil {
+		file.generate = true
+		return true
 	}
-
 	return false
 }
 
@@ -116,6 +104,31 @@ func (gen *Plugin) ForEachFile(fn func(FileDescriptor)) {
 	for _, f := range gen.files {
 		fn(f)
 	}
+}
+
+// FileByName returns a source proto file by name
+func (gen *Plugin) FileByName(filename string) FileDescriptor {
+	return gen.getFileByName(filename)
+}
+
+func (gen *Plugin) getFileByName(fn1 string) *File {
+	for _, f := range gen.files {
+		file, ok := f.(*File)
+		if !ok {
+			continue
+		}
+
+		fn2, ok := optional2(file.fdp.Name, "")
+		if !ok {
+			continue
+		}
+
+		if fn1 == fn2 {
+			return file
+		}
+	}
+
+	return nil
 }
 
 func (gen *Plugin) loadFiles(files ...*descriptorpb.FileDescriptorProto) {
