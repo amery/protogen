@@ -40,11 +40,11 @@ func (f *File) Generate() bool {
 }
 
 func (gen *Plugin) setFilesGenerate(files ...string) error {
-	for _, fn1 := range files {
-		if !gen.setFileGenerate(fn1) {
+	for _, filename := range files {
+		if !gen.setFileGenerate(filename) {
 			return &fs.PathError{
 				Op:   "generate",
-				Path: fn1,
+				Path: filename,
 				Err:  fs.ErrNotExist,
 			}
 		}
@@ -53,8 +53,8 @@ func (gen *Plugin) setFilesGenerate(files ...string) error {
 	return nil
 }
 
-func (gen *Plugin) setFileGenerate(fn1 string) bool {
-	file := gen.getFileByName(fn1)
+func (gen *Plugin) setFileGenerate(filename string) bool {
+	file := gen.getFileByName(filename)
 	if file != nil {
 		file.generate = true
 		return true
@@ -120,20 +120,10 @@ func (gen *Plugin) FileByName(filename string) FileDescriptor {
 	return gen.getFileByName(filename)
 }
 
-func (gen *Plugin) getFileByName(fn1 string) *File {
+func (gen *Plugin) getFileByName(filename string) *File {
 	for _, f := range gen.files {
-		file, ok := f.(*File)
-		if !ok {
-			continue
-		}
-
-		fn2, ok := optional2(file.fdp.Name, "")
-		if !ok {
-			continue
-		}
-
-		if fn1 == fn2 {
-			return file
+		if f.Name() == filename {
+			return f.(*File)
 		}
 	}
 
