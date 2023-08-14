@@ -12,7 +12,7 @@ var (
 // Enum is the implementation of EnumDescriptor
 type Enum struct {
 	file *File
-	edp  *descriptorpb.EnumDescriptorProto
+	dp   *descriptorpb.EnumDescriptorProto
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
@@ -23,7 +23,7 @@ func (p *Enum) Request() *pluginpb.CodeGeneratorRequest {
 
 // Proto returns the underlying protobuf structure
 func (p *Enum) Proto() *descriptorpb.EnumDescriptorProto {
-	return p.edp
+	return p.dp
 }
 
 // File returns the [File] that defines this type
@@ -38,7 +38,7 @@ func (p *Enum) Package() string {
 
 // Name returns the relative name of this type
 func (p *Enum) Name() string {
-	return optional(p.edp.Name, "")
+	return optional(p.dp.Name, "")
 }
 
 // FullName returns the fully qualified name of this type
@@ -83,15 +83,15 @@ func (f *File) EnumByName(name string) EnumDescriptor {
 }
 
 func (f *File) loadEnums() {
-	out := make([]EnumDescriptor, 0, len(f.fdp.EnumType))
-	for _, edp := range f.fdp.EnumType {
-		if edp == nil {
+	out := make([]EnumDescriptor, 0, len(f.dp.EnumType))
+	for _, dp := range f.dp.EnumType {
+		if dp == nil {
 			continue
 		}
 
 		p := &Enum{
 			file: f,
-			edp:  edp,
+			dp:   dp,
 		}
 
 		out = append(out, p)
