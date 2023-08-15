@@ -1,8 +1,6 @@
 package protogen
 
 import (
-	"sort"
-
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -100,10 +98,8 @@ func (p *Enum) init() {
 	}
 
 	// sort values
-	sort.SliceStable(p.values, func(i, j int) bool {
-		a := p.values[i].Number()
-		b := p.values[j].Number()
-		return a < b
+	Sort(p.values, func(a, b *EnumValue) bool {
+		return a.Number() < b.Number()
 	})
 }
 
@@ -192,41 +188,15 @@ func (p *Enum) newValue(dp *descriptorpb.EnumValueDescriptorProto, next int32) i
 // Enums returns all the [Enum] types local to this Message
 func (p *Message) Enums() []*Enum {
 	if p.enums == nil {
-		p.loadEnums()
+		p.enums = loadEnums(Enum{msg: p}, p.dp.EnumType)
 	}
 	return p.enums
-}
-
-func (p *Message) loadEnums() {
-	out := make([]*Enum, 0, len(p.dp.EnumType))
-	for _, dp := range p.dp.EnumType {
-		if dp == nil {
-			continue
-		}
-
-		pe := &Enum{
-			msg: p,
-			dp:  dp,
-		}
-
-		pe.init()
-		out = append(out, pe)
-	}
-
-	// sort enums by name
-	sort.SliceStable(out, func(i, j int) bool {
-		a := out[i].Name()
-		b := out[j].Name()
-		return a < b
-	})
-
-	p.enums = out
 }
 
 // Enums returns all the [Enum] types defined on this file
 func (f *File) Enums() []*Enum {
 	if f.enums == nil {
-		f.loadEnums()
+		f.enums = loadEnums(Enum{file: f}, f.dp.EnumType)
 	}
 	return f.enums
 }
@@ -254,28 +224,25 @@ func (f *File) EnumByName(name string) *Enum {
 	}
 }
 
-func (f *File) loadEnums() {
-	out := make([]*Enum, 0, len(f.dp.EnumType))
-	for _, dp := range f.dp.EnumType {
+func loadEnums(tmpl Enum, enums []*descriptorpb.EnumDescriptorProto) []*Enum {
+	out := make([]*Enum, 0, len(enums))
+	for _, dp := range enums {
 		if dp == nil {
+			// TODO: log error
 			continue
 		}
 
-		pe := &Enum{
-			file: f,
-			dp:   dp,
-		}
+		q := tmpl
+		q.dp = dp
 
-		pe.init()
-		out = append(out, pe)
+		q.init()
+		out = append(out, &q)
 	}
 
 	// sort enums by name
-	sort.SliceStable(out, func(i, j int) bool {
-		a := out[i].Name()
-		b := out[j].Name()
-		return a < b
+	Sort(out, func(a, b *Enum) bool {
+		return a.Name() < b.Name()
 	})
 
-	f.enums = out
+	return out
 }
