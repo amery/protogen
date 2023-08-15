@@ -1,6 +1,14 @@
 # protogen
 
-`protogen` is a Go library to write code generators on any language.
+[![Go Reference][godoc-badge]][godoc]
+[![Go Report Card][goreport-badge]][goreport]
+
+`protogen` is a Go library to write proto code generators for any language.
+
+[godoc]: https://pkg.go.dev/github.com/amery/protogen
+[godoc-badge]: https://pkg.go.dev/badge/github.com/amery/protogen.svg
+[goreport]: https://goreportcard.com/report/github.com/amery/protogen
+[goreport-badge]: https://goreportcard.com/badge/github.com/amery/protogen
 
 ## Setting `protogen` up
 
