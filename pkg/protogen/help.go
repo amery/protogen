@@ -1,6 +1,9 @@
 package protogen
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
 func optional2[T any](p *T, fallback T) (T, bool) {
 	if p != nil {
@@ -23,4 +26,11 @@ func SplitName(fullname string) (prefix string, name string, found bool) {
 	}
 
 	return fullname[:i], fullname[i+1:], true
+}
+
+// Sort sorts a slice of pointers
+func Sort[T any](s []*T, less func(a, b *T) bool) {
+	sort.Slice(s, func(i, j int) bool {
+		return less(s[i], s[j])
+	})
 }
