@@ -19,6 +19,7 @@ type Message struct {
 
 	enums    []*Enum
 	messages []*Message
+	fields   []*Field
 }
 
 // Request returns the [pluginpb.CodeGeneratorRequest] received by
