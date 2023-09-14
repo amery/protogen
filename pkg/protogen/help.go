@@ -17,15 +17,30 @@ func optional[T any](p *T, fallback T) T {
 	return v
 }
 
-// SplitName the last element of a dot delimited name
-func SplitName(fullname string) (prefix string, name string, found bool) {
-	i := strings.LastIndexByte(fullname, byte('.'))
+// CutLastFunc slices s around the last match of a rune checker,
+// returning the text before and after it.
+// The found result reports whether there was a match.
+// If there is no match in s, cut returns "", s, false.
+func CutLastFunc(s string, f func(rune) bool) (before string, after string, found bool) {
+	i := strings.LastIndexFunc(s, f)
 	if i < 0 {
-		// no prefix in name
-		return "", fullname, false
+		return "", s, false
 	}
 
-	return fullname[:i], fullname[i+1:], true
+	return s[:i], s[i+1:], true
+}
+
+// CutLastRune slices s around the last instance of the given rune,
+// returning the text before and after it.
+// The found result reports whether the rune appears in s.
+// If the rune does not appear in s, cut returns "", s, false.
+func CutLastRune(s string, r rune) (before string, after string, found bool) {
+	return CutLastFunc(s, func(r2 rune) bool { return r == r2 })
+}
+
+// SplitName the last element of a dot delimited name
+func SplitName(fullname string) (before string, after string, found bool) {
+	return CutLastFunc(fullname, func(r rune) bool { return r == '.' })
 }
 
 // Sort sorts a slice of pointers
