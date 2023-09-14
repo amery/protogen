@@ -1,6 +1,7 @@
 package styles
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/amery/protogen/pkg/protogen"
@@ -12,19 +13,20 @@ func (style Style) FilenameWithSuffixes(file *protogen.File, suffixes ...string)
 	var singleDot bool
 	var parts []string
 
-	base := file.Base()
+	// split source file name without .proto
+	dirName, fileName := filepath.Split(file.Base())
 
 	switch {
-	case base == "":
+	case fileName == "":
 		// skip
 	case style.FilenameSingleDot:
 		// single-dot
-		prefix := strings.Split(base, ".")
+		prefix := strings.Split(fileName, ".")
 		parts = append(parts, prefix...)
 		singleDot = true
 	default:
 		// multi-dot
-		parts = append(parts, base)
+		parts = append(parts, fileName)
 	}
 
 	parts = append(parts, suffixes...)
@@ -35,9 +37,10 @@ func (style Style) FilenameWithSuffixes(file *protogen.File, suffixes ...string)
 			// 3+ parts
 			base := strings.Join(parts[:l-1], "_")
 			ext := parts[l-1]
-			return base + "." + ext
+
+			parts = []string{base, ext}
 		}
 	}
 
-	return strings.Join(parts, ".")
+	return dirName + strings.Join(parts, ".")
 }
