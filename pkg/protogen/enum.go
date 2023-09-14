@@ -203,10 +203,10 @@ func (f *File) Enums() []*Enum {
 
 // EnumByName finds a [Enum] by name
 func (f *File) EnumByName(name string) *Enum {
-	pkgname, name, _ := SplitName(name)
+	pkgName, name, _ := SplitName(name)
 
 	switch {
-	case pkgname != "" && f.Package() != pkgname:
+	case pkgName != "" && f.Package() != pkgName:
 		// wrong package
 		return nil
 	case name == "":
@@ -224,7 +224,7 @@ func (f *File) EnumByName(name string) *Enum {
 	}
 }
 
-func loadEnums(tmpl Enum, enums []*descriptorpb.EnumDescriptorProto) []*Enum {
+func loadEnums(ref Enum, enums []*descriptorpb.EnumDescriptorProto) []*Enum {
 	out := make([]*Enum, 0, len(enums))
 	for _, dp := range enums {
 		if dp == nil {
@@ -232,7 +232,7 @@ func loadEnums(tmpl Enum, enums []*descriptorpb.EnumDescriptorProto) []*Enum {
 			continue
 		}
 
-		q := tmpl
+		q := ref
 		q.dp = dp
 
 		q.init()
