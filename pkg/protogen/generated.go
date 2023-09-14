@@ -56,33 +56,32 @@ func (f *GeneratedFile) Close() error {
 }
 
 func (gen *Plugin) saveGenerated(f *GeneratedFile) error {
-	var err error
-
 	// double check we are the right instance
 	f0, ok := gen.generated[f.name]
 	if !ok || f0 != f {
 		return fs.ErrInvalid
 	}
 
-	b := f.buf.Bytes()
-	switch {
-	case utf8.Valid(b):
-		// append to response
-		f := &pluginpb.CodeGeneratorResponse_File{
-			Name:    proto.String(f.name),
-			Content: proto.String(string(b)),
-		}
+	defer func() {
+		// remove regardless the outcome
+		delete(f.gen.generated, f.name)
+		f.buf = nil
+	}()
 
-		gen.resp.File = append(gen.resp.File, f)
-	default:
-		// invalid UTF-8
-		err = Wrap(ErrInvalidUTF8Content, f.name)
+	// content
+	s := f.buf.String()
+	if !utf8.ValidString(s) {
+		return Wrap(ErrInvalidUTF8Content, f.name)
 	}
 
-	// remove
-	delete(f.gen.generated, f.name)
-	f.buf = nil
-	return err
+	// append to response
+	g := &pluginpb.CodeGeneratorResponse_File{
+		Name:    proto.String(f.name),
+		Content: proto.String(s),
+	}
+
+	gen.resp.File = append(gen.resp.File, g)
+	return nil
 }
 
 // Discard tells the plugin not to emit this file
