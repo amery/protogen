@@ -1,6 +1,7 @@
 package protogen
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 )
@@ -36,7 +37,7 @@ func (e WrappedError) Unwrap() error {
 }
 
 // Wrap wraps an error with a formatted hint message
-func Wrap(err error, hint string, args ...any) *WrappedError {
+func Wrap(err error, hint string, args ...any) error {
 	if err == nil {
 		return nil
 	}
@@ -45,8 +46,65 @@ func Wrap(err error, hint string, args ...any) *WrappedError {
 		hint = fmt.Sprintf(hint, args...)
 	}
 
+	if hint == "" {
+		return err
+	}
+
 	return &WrappedError{
 		Err:  err,
 		Hint: hint,
+	}
+}
+
+// ErrAggregation bundles multiple errors
+type ErrAggregation struct {
+	Errs []error
+}
+
+// Errors returns the included errors
+func (e *ErrAggregation) Errors() []error {
+	if e == nil || len(e.Errs) == 0 {
+		return nil
+	}
+
+	return e.Errs
+}
+
+func (e *ErrAggregation) Error() string {
+	var buf bytes.Buffer
+
+	if len(e.Errs) == 0 {
+		return "OK"
+	}
+
+	for _, err := range e.Errs {
+		_, _ = fmt.Fprint(&buf, "* ", err.Error(), "\n")
+	}
+
+	return buf.String()
+}
+
+// AsError returns nil if there are no errors stored,
+// or itself if there are.
+func (e *ErrAggregation) AsError() error {
+	if len(e.Errs) == 0 {
+		return nil
+	}
+	return e
+}
+
+// Append stores an error on the aggregation
+func (e *ErrAggregation) Append(err error) {
+	if err != nil {
+		e.Errs = append(e.Errs, err)
+	}
+}
+
+// AppendWrapped stores an error on the aggregation wrapped with a hint
+func (e *ErrAggregation) AppendWrapped(err error, hint string, args ...any) {
+	if err != nil {
+		err = Wrap(err, hint, args...)
+
+		e.Errs = append(e.Errs, err)
 	}
 }
