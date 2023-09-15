@@ -36,13 +36,17 @@ func (e WrappedError) Unwrap() error {
 }
 
 // Wrap wraps an error with a formatted hint message
-func Wrap(err error, hint string, args ...any) *WrappedError {
+func Wrap(err error, hint string, args ...any) error {
 	if err == nil {
 		return nil
 	}
 
 	if len(args) > 0 {
 		hint = fmt.Sprintf(hint, args...)
+	}
+
+	if hint == "" {
+		return err
 	}
 
 	return &WrappedError{
