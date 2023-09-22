@@ -1,0 +1,26 @@
+project_name: protogen
+builds:
+  - id: protoc-gen-dump
+    main: ./cmd/protoc-gen-dump
+    binary: protoc-gen-dump
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - ppc64le
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - id: protoc-gen-dump
+    builds:
+      - protoc-gen-dump
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: tar.xz
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  algorithm: sha256
