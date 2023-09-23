@@ -61,6 +61,7 @@ func NewPlugin(opts *Options, req *pluginpb.CodeGeneratorRequest) (*Plugin, erro
 
 	gen := &Plugin{
 		options:   *opts,
+		params:    make(map[string]string),
 		generated: make(map[string]*GeneratedFile),
 	}
 

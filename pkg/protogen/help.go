@@ -31,9 +31,29 @@ func IsZero(vi any) bool {
 
 	switch v.Kind() {
 	case reflect.Pointer:
+		// (*T)(nil)
 		return v.IsNil()
+	case reflect.Invalid:
+		// nil
+		return true
 	default:
+		// T{}
 		return v.IsZero()
+	}
+}
+
+// IsNil checks if a given value is nil, regardless the type
+func IsNil(vi any) bool {
+	v := reflect.ValueOf(vi)
+	switch v.Kind() {
+	case reflect.Pointer:
+		// *T(nl)
+		return v.IsNil()
+	case reflect.Invalid:
+		// nil
+		return true
+	default:
+		return false
 	}
 }
 

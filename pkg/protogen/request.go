@@ -37,8 +37,12 @@ func (gen *Plugin) loadRequest(req *pluginpb.CodeGeneratorRequest) error {
 	}
 
 	// Parameter
-	if err := gen.loadParams(optional(req.Parameter, "")); err != nil {
-		return err
+	if p := req.Parameter; p != nil {
+		err := gen.loadParams(*p)
+		if err != nil {
+			// bad parameters
+			return err
+		}
 	}
 
 	gen.req = req
@@ -57,11 +61,14 @@ func (gen *Plugin) Params() map[string]string {
 }
 
 func (gen *Plugin) loadParams(params string) error {
-	gen.params = make(map[string]string)
+	for _, s := range strings.Split(params, ",") {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			// skip empty
+			continue
+		}
 
-	s := strings.Split(params, ",")
-	for _, param := range s {
-		k, v, found := strings.Cut(param, "=")
+		k, v, found := strings.Cut(s, "=")
 		if !found {
 			v = "true"
 		}
