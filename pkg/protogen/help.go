@@ -28,7 +28,13 @@ func IsZero(vi any) bool {
 	}
 
 	v := reflect.ValueOf(vi)
-	return v.IsNil() || v.IsZero()
+
+	switch v.Kind() {
+	case reflect.Pointer:
+		return v.IsNil()
+	default:
+		return v.IsZero()
+	}
 }
 
 // CutLastFunc slices s around the last match of a rune checker,
