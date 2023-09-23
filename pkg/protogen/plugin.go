@@ -20,6 +20,9 @@ type Plugin struct {
 func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {
 	gen.options.SetDefaults()
 
+	// extra features supported by the plugin
+	gen.resp.SupportedFeatures = PointerOrNil(uint64(gen.options.Features))
+
 	if req == nil {
 		var err error
 
@@ -61,9 +64,6 @@ func NewPlugin(opts *Options, req *pluginpb.CodeGeneratorRequest) (*Plugin, erro
 		generated: make(map[string]*GeneratedFile),
 	}
 
-	if err := gen.init(req); err != nil {
-		return nil, err
-	}
-
-	return gen, nil
+	// always return the *Plugin so it can be used to respond
+	return gen, gen.init(req)
 }

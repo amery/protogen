@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"unicode/utf8"
 
 	"google.golang.org/protobuf/proto"
@@ -29,6 +30,28 @@ type GeneratedFile struct {
 // Name returns the output name associated to this file
 func (f *GeneratedFile) Name() string {
 	return f.name
+}
+
+// P adds content in the way of fmt.Print, not inserting space between
+// arguments
+func (f *GeneratedFile) P(values ...any) {
+	_, err := fmt.Fprint(f.buf, values...)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// F adds formatted content in the way of fmt.Printf
+func (f *GeneratedFile) F(format string, args ...any) {
+	_, err := fmt.Fprintf(f.buf, format, args...)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// T executes a template over the buffer
+func (f *GeneratedFile) T(t *template.Template, data any) error {
+	return t.Execute(f.buf, data)
 }
 
 // Write writes content to the file

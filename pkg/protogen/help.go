@@ -1,6 +1,7 @@
 package protogen
 
 import (
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -15,6 +16,19 @@ func optional2[T any](p *T, fallback T) (T, bool) {
 func optional[T any](p *T, fallback T) T {
 	v, _ := optional2(p, fallback)
 	return v
+}
+
+// IsZero checks if a given value is zero, either using
+// the IsZero() bool interface or reflection
+func IsZero(vi any) bool {
+	if p, ok := vi.(interface {
+		IsZero() bool
+	}); ok {
+		return p.IsZero()
+	}
+
+	v := reflect.ValueOf(vi)
+	return v.IsNil() || v.IsZero()
 }
 
 // CutLastFunc slices s around the last match of a rune checker,
