@@ -4,6 +4,8 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"google.golang.org/protobuf/types/pluginpb"
 )
 
 // Options specifies callbacks and streams to be used by the protogen [Plugin]
@@ -42,6 +44,11 @@ type Options struct {
 	// Logger is optional [log.Logger] to use for errors. If not specified
 	// one will be built using Stderr
 	Logger *log.Logger
+
+	// Features indicates what extra features the plugin supports.
+	// 0: None
+	// 1: Proto3 Optional
+	Features pluginpb.CodeGeneratorResponse_Feature
 }
 
 // SetDefaults fills any gap in the Options object

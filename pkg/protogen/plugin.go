@@ -20,6 +20,9 @@ type Plugin struct {
 func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {
 	gen.options.SetDefaults()
 
+	// extra features supported by the plugin
+	gen.resp.SupportedFeatures = PointerOrNil(uint64(gen.options.Features))
+
 	if req == nil {
 		var err error
 
