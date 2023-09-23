@@ -53,19 +53,19 @@ type Options struct {
 
 // SetDefaults fills any gap in the Options object
 func (opts *Options) SetDefaults() {
-	if opts.Stdin == nil {
+	if IsNil(opts.Stdin) {
 		opts.Stdin = os.Stdin
 	}
 
-	if opts.Stdout == nil {
+	if IsNil(opts.Stdout) {
 		opts.Stdout = os.Stdout
 	}
 
-	if opts.Stderr == nil {
+	if IsNil(opts.Stderr) {
 		opts.Stderr = os.Stderr
 	}
 
-	if opts.Logger == nil {
+	if IsNil(opts.Logger) {
 		opts.Logger = log.New(opts.Stderr, "protogen: ", 0)
 	}
 }
