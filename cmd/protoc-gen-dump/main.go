@@ -2,11 +2,14 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"path/filepath"
+
+	"google.golang.org/protobuf/types/pluginpb"
 
 	"github.com/amery/protogen/pkg/protogen"
+	"github.com/amery/protogen/pkg/protogen/plugin"
 )
 
 func generate(gen *protogen.Plugin) error {
@@ -27,14 +30,33 @@ func generate(gen *protogen.Plugin) error {
 	return errs.AsError()
 }
 
-func main() {
-	arg0 := filepath.Base(os.Args[0])
+func run(in io.ReadCloser, out io.WriteCloser) error {
 	opts := protogen.Options{
-		Logger: log.New(os.Stderr, arg0+": ", 0),
+		Logger:   log.New(os.Stderr, plugin.CmdName()+": ", 0),
+		Stdin:    in,
+		Stdout:   out,
+		Features: pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL,
 	}
 
-	err := opts.Run(generate)
-	if err != nil {
+	return opts.Run(generate)
+}
+
+func main() {
+	pc := &plugin.Config{
+		RunE: run,
+	}
+
+	rootCmd, err := plugin.NewRoot(pc)
+	if err == nil {
+		err = rootCmd.Execute()
+	}
+
+	switch e := err.(type) {
+	case *plugin.ExitError:
+		os.Exit(e.Code)
+	case nil:
+		os.Exit(0)
+	default:
 		log.Fatal(err)
 	}
 }
