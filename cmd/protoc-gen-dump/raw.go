@@ -29,7 +29,7 @@ func saveRawMessage(m protoreflect.ProtoMessage, name string) error {
 }
 
 func saveRawRequest(gen *protogen.Plugin) error {
-	name, _ := gen.Param("req")
+	name, _ := gen.Param("raw_request")
 	if name == "" {
 		// find name
 		gen.ForEachFile(func(f *protogen.File) {
