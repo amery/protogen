@@ -99,6 +99,7 @@ func generate(gen *protogen.Plugin) error {
 		}
 	})
 
+	logRequest(gen)
 	return nil
 }
 
