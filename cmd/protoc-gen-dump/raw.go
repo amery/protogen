@@ -41,10 +41,3 @@ func saveRawRequest(gen *protogen.Plugin, name string) error {
 	gen.Printf("writing binary request to %q", name)
 	return saveRawMessage(gen.Request(), name)
 }
-
-func saveRawFile(gen *protogen.Plugin, file *protogen.File) error {
-	name := file.Base() + ".req.pb"
-
-	gen.Printf("writing binary %q to %q", file.Name(), name)
-	return saveRawMessage(file.Proto(), name)
-}

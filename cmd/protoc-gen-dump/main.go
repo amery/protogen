@@ -21,12 +21,6 @@ func generate(gen *protogen.Plugin) error {
 		}
 	}
 
-	gen.ForEachFile(func(f *protogen.File) {
-		if err := saveRawFile(gen, f); err != nil {
-			errs.AppendWrapped(err, f.Name())
-		}
-	})
-
 	return errs.AsError()
 }
 
