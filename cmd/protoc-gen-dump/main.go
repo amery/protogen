@@ -12,21 +12,15 @@ import (
 	"github.com/amery/protogen/pkg/protogen/plugin"
 )
 
+var cmdName = plugin.CmdName()
+
 func generate(gen *protogen.Plugin) error {
-	var errs protogen.ErrAggregation
-
-	if name, ok := gen.Param("req"); ok {
-		if err := saveRawRequest(gen, name); err != nil {
-			errs.AppendWrapped(err, "req=%s", name)
-		}
-	}
-
-	return errs.AsError()
+	return saveRawRequest(gen)
 }
 
 func run(in io.ReadCloser, out io.WriteCloser) error {
 	opts := protogen.Options{
-		Logger:   log.New(os.Stderr, plugin.CmdName()+": ", 0),
+		Logger:   log.New(os.Stderr, cmdName+": ", 0),
 		Stdin:    in,
 		Stdout:   out,
 		Features: pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL,
@@ -37,6 +31,7 @@ func run(in io.ReadCloser, out io.WriteCloser) error {
 
 func main() {
 	pc := &plugin.Config{
+		Name: cmdName,
 		RunE: run,
 	}
 
