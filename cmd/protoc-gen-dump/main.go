@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -14,8 +15,30 @@ import (
 
 var cmdName = plugin.CmdName()
 
+func rawOutputName(gen *protogen.Plugin) string {
+	// get name
+	name, _ := gen.Param("raw_request")
+	if name != "" {
+		return name
+	}
+
+	// find name
+	gen.ForEachFile(func(f *protogen.File) {
+		if f.Generate() && name == "" {
+			// use
+			name = f.Base()
+		}
+	})
+	return name
+}
+
 func generate(gen *protogen.Plugin) error {
-	return saveRawRequest(gen)
+	name := rawOutputName(gen)
+	if name == "" {
+		return errors.New("couldn't determine name for raw request")
+	}
+
+	return saveRawRequest(gen, name)
 }
 
 func run(in io.ReadCloser, out io.WriteCloser) error {
