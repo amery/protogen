@@ -28,18 +28,7 @@ func saveRawMessage(m protoreflect.ProtoMessage, name string) error {
 	return err
 }
 
-func saveRawRequest(gen *protogen.Plugin) error {
-	name, _ := gen.Param("raw_request")
-	if name == "" {
-		// find name
-		gen.ForEachFile(func(f *protogen.File) {
-			if f.Generate() && name == "" {
-				// use
-				name = f.Base()
-			}
-		})
-	}
-
+func saveRawRequest(gen *protogen.Plugin, name string) error {
 	dirName, fileName := filepath.Split(filepath.Clean(name))
 	switch {
 	case fileName == "":
