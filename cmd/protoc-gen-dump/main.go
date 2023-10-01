@@ -129,7 +129,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) error {
 
 func run(in io.ReadCloser, out io.WriteCloser) error {
 	opts := protogen.Options{
-		Logger:   log.New(os.Stderr, cmdName+": ", 0),
+		Name:     cmdName,
 		Stdin:    in,
 		Stdout:   out,
 		Features: pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL,
