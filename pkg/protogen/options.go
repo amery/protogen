@@ -4,12 +4,16 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
 // Options specifies callbacks and streams to be used by the protogen [Plugin]
 type Options struct {
+	// Name indicates the name of the Plugin
+	Name string
+
 	// If ParamFunc is non-nil, it will be called with each unknown
 	// generator parameter.
 	//
@@ -53,6 +57,10 @@ type Options struct {
 
 // SetDefaults fills any gap in the Options object
 func (opts *Options) SetDefaults() {
+	if opts.Name == "" {
+		opts.Name = filepath.Base(os.Args[0])
+	}
+
 	if IsNil(opts.Stdin) {
 		opts.Stdin = os.Stdin
 	}
@@ -66,7 +74,8 @@ func (opts *Options) SetDefaults() {
 	}
 
 	if IsNil(opts.Logger) {
-		opts.Logger = log.New(opts.Stderr, "protogen: ", 0)
+		prefix := opts.Name + ": "
+		opts.Logger = log.New(opts.Stderr, prefix, log.Lmsgprefix)
 	}
 }
 
