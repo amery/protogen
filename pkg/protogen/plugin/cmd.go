@@ -2,6 +2,7 @@
 package plugin
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -84,7 +85,14 @@ func NewRoot(cfg *Config) (*cobra.Command, error) {
 		Use:     cfg.Name,
 		Short:   cfg.Short,
 		Version: cfg.Version,
-		RunE:    newRootRun(cfg.RunE),
+
+		DisableFlagParsing: true,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return rootPreRunE(cmd, args)
+		},
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return rootRunE(cmd, cfg.RunE)
+		},
 	}
 
 	// stdin/stdout
@@ -95,33 +103,50 @@ func NewRoot(cfg *Config) (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func newRootRun(runE runCmd) func(*cobra.Command, []string) error {
-	return func(cmd *cobra.Command, _ []string) error {
-		flags := cmd.LocalFlags()
+func rootRunE(cmd *cobra.Command, runE runCmd) error {
+	flags := cmd.LocalFlags()
 
-		// stdin
-		in, err := openFileFlag(flags, "input", os.O_RDONLY, 0)
-		switch {
-		case err != nil:
-			return err
-		case in != nil:
-			defer in.Close()
-		default:
-			in = os.Stdin
-		}
-
-		// stdout
-		out, err := openFileFlag(flags, "output", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		switch {
-		case err != nil:
-			return err
-		case out != nil:
-			defer out.Close()
-		default:
-			out = os.Stdout
-		}
-
-		// run plugin
-		return runE(in, out)
+	// stdin
+	in, err := openFileFlag(flags, "input", os.O_RDONLY, 0)
+	switch {
+	case err != nil:
+		return err
+	case in != nil:
+		defer in.Close()
+	default:
+		in = os.Stdin
 	}
+
+	// stdout
+	out, err := openFileFlag(flags, "output", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	switch {
+	case err != nil:
+		return err
+	case out != nil:
+		defer out.Close()
+	default:
+		out = os.Stdout
+	}
+
+	// run plugin
+	return runE(in, out)
+}
+
+func rootPreRunE(cmd *cobra.Command, args []string) error {
+	flags := cmd.LocalFlags()
+
+	err := flags.Parse(args)
+	switch {
+	case err != nil:
+		return err
+	case !flags.Parsed():
+		return errors.New("flags not parsed")
+	}
+
+	err = cmd.ValidateRequiredFlags()
+	if err != nil {
+		return err
+	}
+
+	return cmd.ValidateFlagGroups()
 }
