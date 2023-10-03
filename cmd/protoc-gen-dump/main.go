@@ -11,15 +11,54 @@ import (
 
 	"github.com/amery/protogen/pkg/protogen"
 	"github.com/amery/protogen/pkg/protogen/plugin"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
-var cmdName = plugin.CmdName()
+var (
+	cmdName = plugin.CmdName()
 
-func rawOutputName(gen *protogen.Plugin) string {
-	// get name
-	name, _ := gen.Param("raw_request")
-	if name != "" {
-		return name
+	rawRequestFlag    *pflag.Flag
+	rawRequestValue   *string
+	skipRawWriteValue *bool
+)
+
+func setExtraRootFlags(cmd *cobra.Command) {
+	flags := cmd.LocalFlags()
+
+	rawRequestValue = flags.StringP("raw-request", "w", "",
+		"override where the raw request is saved ('none' or empty to disable)")
+	rawRequestFlag = flags.Lookup("raw-request")
+
+	skipRawWriteValue = flags.BoolP("skip-raw-write", "W", false,
+		"do not save raw request")
+}
+
+func getRawRequestName(gen *protogen.Plugin) (string, bool) {
+	switch {
+	case *skipRawWriteValue:
+		// skip
+		return "", true
+	case rawRequestFlag.Changed:
+		// given via command line
+		return *rawRequestValue, true
+	default:
+		// protoc option
+		return gen.Param("raw_request")
+	}
+}
+
+func rawOutputName(gen *protogen.Plugin) (string, bool) {
+	name, ok := getRawRequestName(gen)
+	if ok {
+		switch name {
+		case "", "none", "false":
+			// disable
+			return "", true
+		default:
+			// use given
+			return name, true
+		}
 	}
 
 	// find name
@@ -29,16 +68,24 @@ func rawOutputName(gen *protogen.Plugin) string {
 			name = f.Base()
 		}
 	})
-	return name
+
+	return name, name != ""
 }
 
 func generate(gen *protogen.Plugin) error {
-	name := rawOutputName(gen)
-	if name == "" {
+	// get name
+	name, ok := rawOutputName(gen)
+	switch {
+	case !ok:
 		return errors.New("couldn't determine name for raw request")
+	case name != "":
+		// save as
+		if err := saveRawRequest(gen, name); err != nil {
+			return err
+		}
 	}
 
-	return saveRawRequest(gen, name)
+	return nil
 }
 
 func run(in io.ReadCloser, out io.WriteCloser) error {
@@ -53,6 +100,7 @@ func run(in io.ReadCloser, out io.WriteCloser) error {
 }
 
 func main() {
+	var err error
 	pc := &plugin.Config{
 		Name: cmdName,
 		RunE: run,
@@ -60,6 +108,8 @@ func main() {
 
 	rootCmd, err := plugin.NewRoot(pc)
 	if err == nil {
+		setExtraRootFlags(rootCmd)
+
 		err = rootCmd.Execute()
 	}
 
