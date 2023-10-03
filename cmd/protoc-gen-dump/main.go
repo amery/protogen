@@ -2,6 +2,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"log"
@@ -73,7 +75,9 @@ func rawOutputName(gen *protogen.Plugin) (string, bool) {
 }
 
 func generate(gen *protogen.Plugin) error {
-	// get name
+	var err error
+
+	// save raw request
 	name, ok := rawOutputName(gen)
 	switch {
 	case !ok:
@@ -85,7 +89,42 @@ func generate(gen *protogen.Plugin) error {
 		}
 	}
 
+	// dump source .proto as .json
+	gen.ForEachFile(func(f *protogen.File) {
+		switch {
+		case err != nil:
+			// aborting
+		case f.Generate():
+			err = generateFile(gen, f)
+		}
+	})
+
 	return nil
+}
+
+func generateFile(gen *protogen.Plugin, f *protogen.File) error {
+	out, err := gen.NewGeneratedFile("%s.json", f.Name())
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = out.Discard()
+	}()
+
+	// Encode
+	data, err := json.Marshal(f.Proto())
+	if err != nil {
+		return err
+	}
+
+	// Write
+	_, err = bytes.NewBuffer(data).WriteTo(out)
+	if err == nil {
+		// success
+		err = out.Close()
+	}
+
+	return err
 }
 
 func run(in io.ReadCloser, out io.WriteCloser) error {
