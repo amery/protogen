@@ -150,3 +150,13 @@ func rootPreRunE(cmd *cobra.Command, args []string) error {
 
 	return cmd.ValidateFlagGroups()
 }
+
+// MustRoot generates a root [cobra.Command] for the plugin's main,
+// and panics if there is an error
+func MustRoot(cfg *Config) *cobra.Command {
+	cmd, err := NewRoot(cfg)
+	if err != nil {
+		panic(err)
+	}
+	return cmd
+}
