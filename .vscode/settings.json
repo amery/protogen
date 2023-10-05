@@ -7,5 +7,10 @@
         "protoc",
         "protogen",
         "unmarshall"
-    ]
+    ],
+    "protoc": {
+        "options": [
+            "-Iprotos"
+        ]
+    }
 }
