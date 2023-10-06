@@ -56,6 +56,37 @@ func Wrap(err error, hint string, args ...any) error {
 	}
 }
 
+// PluginError is a wrapped error referencing a .proto file
+type PluginError struct {
+	Path string
+	Hint string
+	Err  error
+}
+
+func (e PluginError) Error() string {
+	s0 := e.Path
+
+	s1 := e.Hint
+	if s1 == "" && e.Err != nil {
+		s1 = e.Err.Error()
+	}
+
+	if s1 == "" {
+		s1 = "unspecified error"
+	}
+
+	switch {
+	case s0 == "":
+		return s1
+	default:
+		return s0 + ": " + s1
+	}
+}
+
+func (e PluginError) Unwrap() error {
+	return e.Err
+}
+
 // ErrAggregation bundles multiple errors
 type ErrAggregation struct {
 	Errs []error
