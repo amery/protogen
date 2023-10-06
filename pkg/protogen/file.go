@@ -93,6 +93,19 @@ func (f *File) PackageDirectory() string {
 	return strings.ReplaceAll(s, ".", sep)
 }
 
+// OptimizeMode returns the requested optimization mode, or zero
+// if the information is not provided.
+func (f *File) OptimizeMode() descriptorpb.FileOptions_OptimizeMode {
+	opts := f.Proto().GetOptions()
+	if opts != nil {
+		p := opts.OptimizeFor
+		if p != nil {
+			return *p
+		}
+	}
+	return 0
+}
+
 // Dependencies returns the source proto files this one depends on
 func (f *File) Dependencies() []*File {
 	out := make([]*File, len(f.dp.Dependency))
