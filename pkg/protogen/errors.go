@@ -13,6 +13,12 @@ var (
 	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidUTF8Content tells the plugin generated unacceptable content
 	ErrInvalidUTF8Content = errors.New("invalid UTF-8 content generated")
+
+	// ErrUnknownParam tells the plug-in parameter isn't recognized
+	ErrUnknownParam = errors.New("unknown protoc option")
+	// ErrInvalidParam tells the plug-in parameter is known but the value is not
+	// acceptable.
+	ErrInvalidParam = errors.New("invalid protoc option value")
 )
 
 // WrappedError is a simple wrapped error container
