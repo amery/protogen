@@ -1,8 +1,6 @@
 package protogen
 
 import (
-	"github.com/pkg/errors"
-
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
@@ -29,7 +27,7 @@ func (gen *Plugin) init(req *pluginpb.CodeGeneratorRequest) error {
 		// read encoded request from stdin
 		req, err = UnmarshalCodeGeneratorRequest(gen.options.Stdin)
 		if err != nil {
-			return errors.Wrap(err, "UnmarshalCodeGeneratorRequest")
+			return Wrap(err, "UnmarshalCodeGeneratorRequest")
 		}
 	}
 

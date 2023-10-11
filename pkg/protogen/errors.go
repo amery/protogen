@@ -13,6 +13,12 @@ var (
 	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidUTF8Content tells the plugin generated unacceptable content
 	ErrInvalidUTF8Content = errors.New("invalid UTF-8 content generated")
+
+	// ErrUnknownParam tells the plug-in parameter isn't recognized
+	ErrUnknownParam = errors.New("unknown protoc option")
+	// ErrInvalidParam tells the plug-in parameter is known but the value is not
+	// acceptable.
+	ErrInvalidParam = errors.New("invalid protoc option value")
 )
 
 // WrappedError is a simple wrapped error container
@@ -54,6 +60,37 @@ func Wrap(err error, hint string, args ...any) error {
 		Err:  err,
 		Hint: hint,
 	}
+}
+
+// PluginError is a wrapped error referencing a .proto file
+type PluginError struct {
+	Path string
+	Hint string
+	Err  error
+}
+
+func (e PluginError) Error() string {
+	s0 := e.Path
+
+	s1 := e.Hint
+	if s1 == "" && e.Err != nil {
+		s1 = e.Err.Error()
+	}
+
+	if s1 == "" {
+		s1 = "unspecified error"
+	}
+
+	switch {
+	case s0 == "":
+		return s1
+	default:
+		return s0 + ": " + s1
+	}
+}
+
+func (e PluginError) Unwrap() error {
+	return e.Err
 }
 
 // ErrAggregation bundles multiple errors
