@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 var (
@@ -91,6 +93,17 @@ func (e PluginError) Error() string {
 
 func (e PluginError) Unwrap() error {
 	return e.Err
+}
+
+// NewPluginError creates a new PluginError taking the Path from
+// [descriptorpb.FileDescriptorProto#Name]
+func NewPluginError(file *descriptorpb.FileDescriptorProto, err error, hint string) *PluginError {
+	var name string
+	if file != nil && file.Name != nil {
+		name = *file.Name
+	}
+
+	return &PluginError{Path: name, Err: err, Hint: hint}
 }
 
 // ErrAggregation bundles multiple errors
