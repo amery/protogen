@@ -4,7 +4,14 @@ import "nanopb.proto";
 
 option go_package = "github.com/amery/protogen/pkg/nanogrpc";
 
-message GrpcRequest {
+message Request {
+  enum Type {
+    REGULAR = 0;
+    END_ALL_CALLS = 1;
+    PING = 2;
+    GET_ALL_SERVICES = 3;
+  }
+
   required int32 call_id = 1;
   oneof path_oneof {
     int32 path_crc = 2;
@@ -13,45 +20,38 @@ message GrpcRequest {
   required bytes data = 10;
 }
 
-enum GrpcStatus {
-  OK = 0;
-  CANCELLED = 1;
-  UNKNOWN = 2;
-  INVALID_ARGUMENT = 3;
-  DEADLINE_EXCEEDED = 4;
-  NOT_FOUND = 5;
-  ALREADY_EXISTS = 6;
-  PERMISSION_DENIED = 7;
-  UNAUTHENTICATED = 16;
-  RESOURCE_EXHAUSTED = 8;
-  FAILED_PRECONDITION = 9;
-  ABORTED = 10;
-  OUT_OF_RANGE = 11;
-  UNIMPLEMENTED = 12;
-  INTERNAL = 13;
-  UNAVAILABLE = 14;
-  DATA_LOSS = 15;
-}
+message Response {
+  enum Type {
+    REGULAR = 0;
+    STREAM = 1;
+    END_OF_STREAM = 2;
+    END_OF_CALL = 3;
+    PONG = 4;
+  }
 
-enum GrpcRequestType {
-  REQ_REGULAR = 0;
-  REQ_END_ALL_CALLS = 1;
-  REQ_PING = 2;
-  REQ_GET_ALL_SERVICES = 3;
-}
+  enum Status {
+    OK = 0;
+    CANCELLED = 1;
+    UNKNOWN = 2;
+    INVALID_ARGUMENT = 3;
+    DEADLINE_EXCEEDED = 4;
+    NOT_FOUND = 5;
+    ALREADY_EXISTS = 6;
+    PERMISSION_DENIED = 7;
+    UNAUTHENTICATED = 16;
+    RESOURCE_EXHAUSTED = 8;
+    FAILED_PRECONDITION = 9;
+    ABORTED = 10;
+    OUT_OF_RANGE = 11;
+    UNIMPLEMENTED = 12;
+    INTERNAL = 13;
+    UNAVAILABLE = 14;
+    DATA_LOSS = 15;
+  }
 
-enum GrpcResponseType {
-  RES_REGULAR = 0;
-  RES_STREAM = 1;
-  RES_END_OF_STREAM = 2;
-  RES_END_OF_CALL = 3;
-  RES_PONG = 4;
-}
-
-message GrpcResponse {
   required int32 call_id = 1;
-  required GrpcStatus grpc_status = 2;
+  required Status grpc_status = 2;
   optional string grpc_mesage = 3;
-  optional GrpcResponseType response_type = 4;
+  optional Type response_type = 4;
   optional bytes data = 10;
 }
