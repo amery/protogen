@@ -96,7 +96,7 @@ func NewRoot(cfg *Config) (*cobra.Command, error) {
 	}
 
 	// stdin/stdout
-	flags := cmd.LocalFlags()
+	flags := cmd.Flags() // non-persistent
 	flags.StringP("input", "f", "", "file to use instead of stdin")
 	flags.StringP("output", "o", "", "file to use instead of stdout")
 
@@ -104,7 +104,7 @@ func NewRoot(cfg *Config) (*cobra.Command, error) {
 }
 
 func rootRunE(cmd *cobra.Command, runE runCmd) error {
-	flags := cmd.LocalFlags()
+	flags := cmd.Flags()
 
 	// stdin
 	in, err := openFileFlag(flags, "input", os.O_RDONLY, 0)
