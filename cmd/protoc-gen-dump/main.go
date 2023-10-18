@@ -26,7 +26,7 @@ var (
 )
 
 func setExtraRootFlags(cmd *cobra.Command) {
-	flags := cmd.LocalFlags()
+	flags := cmd.Flags()
 
 	rawRequestValue = flags.StringP("raw-request", "w", "",
 		"override where the raw request is saved ('none' or empty to disable)")
