@@ -2,6 +2,13 @@ package plugin
 
 import "fmt"
 
+// An ExitCoder is a fatal error that tells us
+// how to [os.Exit()]
+type ExitCoder interface {
+	Error() string
+	ExitCode() int
+}
+
 // ExitError is an error that is expected to be
 // handled directly via os.Exit(e.Code)
 type ExitError struct {
