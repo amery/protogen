@@ -153,8 +153,8 @@ func main() {
 	}
 
 	switch e := err.(type) {
-	case *plugin.ExitError:
-		os.Exit(e.Code)
+	case plugin.ExitCoder:
+		os.Exit(e.ExitCode())
 	case nil:
 		os.Exit(0)
 	default:
